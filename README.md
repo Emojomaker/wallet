@@ -1,6 +1,7 @@
 # wallet
+Module for creating customers, transferring money between customers, getting information about customers
 
-Initional script for database:
+Initional script for creating table in database:
 
 CREATE TABLE "customers" (
 	"account_number"	INTEGER UNIQUE,
