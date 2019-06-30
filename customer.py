@@ -11,7 +11,7 @@ import log
 parser = argparse.ArgumentParser(usage='%(prog)s [action]',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  description="""\
-Module for creating and transfer money between customers
+Module for creating and transffering money between customers
 Actions:
 
 add_customer    Add customer to database. Insert name and limit for
