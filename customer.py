@@ -155,7 +155,7 @@ def get_customers():
     connection = connect.Database()
     connection.open_connect()
     try:
-        limit = int(input('How mutch strings do you want see? '))
+        limit = int(input('How much strings do you want see? '))
         if limit == 0:
             print('Name|Balance|Limit balance')
             info = connection.get('customers', 'name_customer, balance,limit_balance')
