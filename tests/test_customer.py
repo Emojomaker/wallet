@@ -1,6 +1,5 @@
 import pytest
 import customer
-import connect
 import unittest.mock as mock
 
 
