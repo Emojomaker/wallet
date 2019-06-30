@@ -2,7 +2,6 @@
    manage this connection
 """
 
-
 import sqlite3
 
 class Database():
