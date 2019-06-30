@@ -1,3 +1,8 @@
+"""Module for create connection to database and
+   manage this connection
+"""
+
+
 import sqlite3
 
 class Database():
@@ -13,6 +18,7 @@ class Database():
 
 
     def open_connect(self):
+        """Open connection to database"""
 
         try:
             self.conn = sqlite3.connect(self.database_name)
@@ -22,6 +28,7 @@ class Database():
 
 
     def close_connect(self):
+        """Close connection to database"""
 
         if self.conn:
             self.conn.commit()
@@ -30,24 +37,26 @@ class Database():
 
 
     def query(self,sql):
+        """Execute sql expression"""
 
         self.cursor.execute(sql)
 
 
     def getone(self, query):
+        """Get one string from database"""
 
         self.cursor.execute(query)
         rows = self.cursor.fetchone()
         return rows
 
+
     def get(self, table, columns, limit=None):
+        """Add few strings from database"""
 
         query = "SELECT {0} from {1};".format(columns, table)
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
         return rows[len(rows) - limit if limit else 0:]
-
-
 
 
 

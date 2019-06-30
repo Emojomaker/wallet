@@ -1,3 +1,7 @@
+"""Module for creating customers, transferring money
+   between customers, getting information about customers
+"""
+
 import random
 import connect
 import argparse
@@ -34,19 +38,8 @@ class Customer():
         self.account_number = random.randint(1000000,9999999)
 
 
-    def data_of_customer(self, name_user):
-        if name_user == self.name_customer:
-            data = {
-            'id': self.account_number,
-            'name':self.name_customer,
-            'balance': self.balance,
-            'limit': self.limit,
-            'currency': self.currency,
-            }
-        return data
-
-
     def get_customer_info(self):
+        """Get information about new created customer"""
         return (f'\nCustomer created:\n'
                 f'Customer name: {self.name_customer}\n'
                 f'Customer currency: {self.currency}\n'
@@ -60,6 +53,7 @@ class Customer():
 
 
 def check_var_for_balance(name, choice):
+    """Check variable for balance of customer"""
     if choice == 'y' or choice == 'Y':
         try:
             balance = int(input(f'Enter balance for {name}: '))
@@ -72,6 +66,7 @@ def check_var_for_balance(name, choice):
 
 
 def add_customer():
+    """Creating new customer"""
     name = input('Name of customer: ')
     if len(name) == 0 or len(name) < 4:
         print('Sorry, enter correct name for customer. Length must be 4 letters')
@@ -96,6 +91,7 @@ def add_customer():
 
 
 def operations_with_money(sender, recipient, sum):
+    """Operations for transferring money and logic for check sender and recipient balance"""
     connection = connect.Database()
     connection.open_connect()
     try:
@@ -147,6 +143,7 @@ def operations_with_money(sender, recipient, sum):
 
 
 def transfer_money(sender, recepient, sum):
+    """Check sum for transferring and redirecting to operations_with_money function"""
     if int(sum) <= 0:
         print(f'Sorry, can not perform operations with {sum} sum')
     else:
@@ -154,6 +151,7 @@ def transfer_money(sender, recepient, sum):
 
 
 def get_customers():
+    """Get list with information adout customers with limit for strings"""
     connection = connect.Database()
     connection.open_connect()
     try:
