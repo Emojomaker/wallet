@@ -40,6 +40,14 @@ class Database():
         rows = self.cursor.fetchone()
         return rows
 
+    def get(self, table, columns, limit=None):
+
+        query = "SELECT {0} from {1};".format(columns, table)
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return rows[len(rows) - limit if limit else 0:]
+
+
 
 
 
