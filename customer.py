@@ -1,8 +1,27 @@
 import random
 import connect
 import argparse
-import sys
-action = sys.argv[1]
+import log
+
+
+parser = argparse.ArgumentParser(usage='%(prog)s [action]',
+                                 formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 description="""\
+Module for creating and transfer money between customers
+Actions:
+
+add_customer    Add customer to database. Insert name and limit for
+                current user
+transfer_money  Insert sender name and recipient name for trasfer
+                money between customers
+get_customers   Insert number for get string collection
+                Insert 0 for unlimited string collection
+                                 """
+                                 )
+parser.add_argument('action', help='Action for module')
+args = parser.parse_args()
+action = args.action
+
 
 class Customer():
 
@@ -76,45 +95,53 @@ def add_customer():
             print('Limit can not be string, only integer')
 
 
-def operations_with_money(sender, recepient, sum):
+def operations_with_money(sender, recipient, sum):
     connection = connect.Database()
     connection.open_connect()
     try:
         sender_get = "SELECT account_number, balance, limit_balance from CUSTOMERS WHERE name_customer='" + sender + "'"
-        recepient_get = "SELECT account_number, balance, limit_balance from CUSTOMERS WHERE " \
-                        "name_customer='" + recepient + "'"
+        recipient_get = "SELECT account_number, balance, limit_balance from CUSTOMERS WHERE " \
+                        "name_customer='" + recipient + "'"
         sender_info = connection.getone(sender_get)
-        recepient_info = connection.getone(recepient_get)
-        recepient_limit = int(recepient_info[2])
+        recipient_info = connection.getone(recipient_get)
+        recipient_limit = int(recipient_info[2])
         current_sender_balance = int(sender_info[1])
-        current_recepient_balance = int(recepient_info[1])
+        current_recipient_balance = int(recipient_info[1])
         future_sender_balance = (current_sender_balance - int(sum))
-        future_recepient_balance = (current_recepient_balance + int(sum))
+        future_recipient_balance = (current_recipient_balance + int(sum))
         if future_sender_balance > 0:
-            if future_recepient_balance < recepient_limit:
+            if future_recipient_balance < recipient_limit:
                 connection.query("UPDATE CUSTOMERS set balance='" + str(future_sender_balance) + "' "
                                  "WHERE account_number='" + str(sender_info[0]) + "'")
-                connection.query("UPDATE CUSTOMERS set balance='" + str(future_recepient_balance) + "' "
-                                 "WHERE account_number='" + str(recepient_info[0]) + "'")
-                print(f'{sender} moved {sum} RUB to {recepient} bank account')
-            elif future_recepient_balance > recepient_limit:
-                print(f'Can not move {sum} to {recepient} bank account, because limit equal {recepient_limit}')
-            elif future_recepient_balance == recepient_limit:
+                connection.query("UPDATE CUSTOMERS set balance='" + str(future_recipient_balance) + "' "
+                                 "WHERE account_number='" + str(recipient_info[0]) + "'")
+                message = f'{sender} moved {sum} RUB to {recipient} bank account'
+                print(message)
+                log.log(message)
+            elif future_recipient_balance > recipient_limit:
+                print(f'Can not move {sum} to {recipient} bank account, because limit equal {recipient_limit}')
+            elif future_recipient_balance == recipient_limit:
                 connection.query("UPDATE CUSTOMERS set balance='" + str(future_sender_balance) + "'"
                                  " WHERE account_number='" + str(sender_info[0]) + "'")
-                connection.query("UPDATE CUSTOMERS set balance='" + str(future_recepient_balance) + "'"
-                                 " WHERE account_number='" + str(recepient_info[0]) + "'")
-                print(f'{sender} moved {sum} to {recepient} bank account, but limit of {recepient} exhausted')
+                connection.query("UPDATE CUSTOMERS set balance='" + str(future_recipient_balance) + "'"
+                                 " WHERE account_number='" + str(recipient_info[0]) + "'")
+                message = f'{sender} moved {sum} to {recipient} bank account, but limit of {recipient} exhausted'
+                print(message)
+                log.log(message)
         elif future_sender_balance == 0:
             connection.query("UPDATE CUSTOMERS set balance='" + str(future_sender_balance) + "'"
                              " WHERE account_number='" + str(sender_info[0]) + "'")
-            connection.query("UPDATE CUSTOMERS set balance='" + str(future_recepient_balance) + "'"
-                             " WHERE account_number='" + str(recepient_info[0]) + "'")
-            print(f'{sender} {sum} RUB to {recepient} bank account, but his balance became equal 0')
+            connection.query("UPDATE CUSTOMERS set balance='" + str(future_recipient_balance) + "'"
+                             " WHERE account_number='" + str(recipient_info[0]) + "'")
+            message = f'{sender} {sum} RUB to {recipient} bank account, but his balance became equal 0'
+            print(message)
+            log.log(message)
         elif future_sender_balance < 0:
-            print(f'{sender} can not move {sum} to {recepient} because balance will become less 0')
+            message = f'{sender} can not move {sum} to {recipient} because balance will become less 0'
+            print(message)
+            log.log(message)
     except TypeError:
-        print(f'{recepient} or {sender} customers not found in database')
+        print(f'{recipient} or {sender} customers not found in database')
     finally:
         connection.close_connect()
 
@@ -125,20 +152,22 @@ def transfer_money(sender, recepient, sum):
     else:
         operations_with_money(sender, recepient, sum)
 
+
 def get_customers():
     connection = connect.Database()
     connection.open_connect()
     try:
         limit = int(input('How mutch strings do you want see? '))
         if limit == 0:
+            print('Name|Balance|Limit balance')
             info = connection.get('customers', 'name_customer, balance,limit_balance')
             for string in info:
-                print(str(string).strip("(,',)").replace("'",""))
+                print(str(string).strip("(,',)").replace("'","").replace(",","\t"))
         else:
             info = connection.get('customers', 'name_customer, balance,limit_balance', limit)
             print('Name|Balance|Limit balance')
             for string in info:
-                print(str(string).strip("(,',)").replace("'",""))
+                print(str(string).strip("(,',)").replace("'","").replace(",","\t"))
     except ValueError:
         print('Insert can be only integer')
     finally:
@@ -146,7 +175,7 @@ def get_customers():
 
 
 def main():
-    if action == 'add_customer':
+    if  action == 'add_customer':
         add_customer()
     elif action == 'transfer_money':
         sender = input('Name of sender: ')
