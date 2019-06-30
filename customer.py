@@ -133,7 +133,7 @@ def get_customers():
         if limit == 0:
             info = connection.get('customers', 'name_customer, balance,limit_balance')
             for string in info:
-                print(string)
+                print(str(string).strip("(,',)").replace("'",""))
         else:
             info = connection.get('customers', 'name_customer, balance,limit_balance', limit)
             print('Name|Balance|Limit balance')
