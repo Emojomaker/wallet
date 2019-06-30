@@ -6,7 +6,7 @@
 import sqlite3
 
 class Database():
-
+    """_db_file - default sqlite database file"""
     _db_file = 'wallet.db'
 
 
