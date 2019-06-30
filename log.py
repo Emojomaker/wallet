@@ -1,4 +1,4 @@
-"""Module for loggin operation to log file"""
+"""Module for logging operations to log file"""
 
 import datetime
 
