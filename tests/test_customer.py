@@ -1,41 +1,70 @@
 import pytest
 import customer
+import connect
 import unittest.mock as mock
 
-
-def test_customer():
-    users = ['Sam', 'Jack', 'Andrew', 'Kate']
-    balances = [100, 300, '500', '-1']
-    for user,balance in zip(users,balances):
-        custom = customer.Customer(user, balance)
-        assert custom.name_customer == user
-        assert custom.balance == balance
+@pytest.fixture(scope="session")
+def create_connect():
+    connection = connect.Database()
+    connection.open_connect()
+    connection.close_connect()
 
 
-def test_no_value():
-    with pytest.raises(Exception) as info:
-        obj = customer.Customer()
+@pytest.mark.parametrize("name_customer, balance", [
+    ('Paul',500),
+    ('Sam',300),
+    ('Paul', '500'),
+    ('Sam', '300'),
+])
+def test_class_customer(name_customer,balance):
+    user = customer.Customer(name_customer, balance)
+    assert user.name_customer == name_customer
+    assert user.balance == balance
+    assert user.currency == 'RUB'
+    assert user.limit == 0
 
 
-@pytest.yield_fixture
-def fake_input():
-    with mock.patch('customer.check_var_for_balance') as mod:
-        yield mod
+@pytest.mark.parametrize("name, choice, balance", [
+    ('Paul','Y', 500),
+    ('Paul', 'y', 300),
+    ('Sam','N', 0),
+    ('Sam','n', 0),
+])
+def test_input_check_var_for_variables(monkeypatch, name, choice, balance):
+    monkeypatch.setattr('builtins.input', lambda _: balance)
+    assert customer.check_var_for_balance(name, choice) == balance
 
 
-def test_check_var_for_balanse(fake_input):
-    choises = ['y','Y','n','N']
-    names = ['Pauls', 'Jeni', 'Rodger']
-    for ch, name in zip(choises, names):
-        fake_input.return_value = '500'
-        customer.check_var_for_balance(ch, name)
+@pytest.mark.parametrize("name, limit, choice", [
+    ('Paul',500, 'Y'),
+    ('Paul', 500, 'y'),
+    ('Sam', 300, 'n'),
+    ('Sam', 200, 'N'),
+])
+def test_input_add_customer(monkeypatch, name, limit, choice):
+    monkeypatch.setattr('builtins.input', lambda _: choice)
+    assert customer.add_customer() == None
 
 
-def test_get_customers():
-    with mock.patch('customer.get_customers', return_value=0):
-        assert customer.get_customers() == 0
-    with mock.patch('customer.get_customers', return_value=5):
-        assert customer.get_customers() == 5
+@pytest.mark.parametrize("choice", [
+    (1),
+    (2),
+    (3),
+    (0),
+])
+def test_get_customers(monkeypatch, choice):
+    monkeypatch.setattr('builtins.input', lambda _: choice)
+    assert customer.get_customers() == None
+
+
+@pytest.mark.parametrize("sender, recipient, sum", [
+    ('Paul', 'Sam', 100),
+    ('Sam', 'Paul', 100),
+    ('Paul', 'Kata', 200),
+    ('Kata','Paul', 200),
+])
+def test_transfer_money(sender, recipient, sum):
+    assert customer.transfer_money(sender, recipient, sum) == None
 
 
 
